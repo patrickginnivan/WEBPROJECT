@@ -148,16 +148,18 @@ module.exports.deleteUserById = deleteUserById;
 /* For all the products operation */
 // Create new product
 var createProduct = function(req, res) {
+    console.log('Hello')
     var product = new Product(
         {
-            "userId":req.body.userId,
-            "createdAt":req.body.createdAt,
-            "name":req.body.name,
-            "description":req.body.description,
-            "expirationDate":req.body.expirationDate,
-            "category":req.body.category,
-            "condition":req.body.condition,
-            "rating":req.body.rating
+            "userId":req.body.Product.userId,
+            "createdAt":req.body.Product.createdAt,
+            "name":req.body.Product.name,
+            "description":req.body.Product.description,
+            "expirationDate":req.body.Product.expirationDate,
+            "category":req.body.Product.category,
+            "condition":req.body.Product.condition,
+            "rating":req.body.Product.rating,
+            "marker":req.body.Product.marker
         }
     );
 
@@ -165,7 +167,6 @@ var createProduct = function(req, res) {
         if (!err) {
             res.send(newProduct);
         } else {
-            console.log("here");
             res.sendStatus(400);
         }
     });
