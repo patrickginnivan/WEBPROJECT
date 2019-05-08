@@ -1,11 +1,6 @@
 <!--https://alligator.io/vuejs/vue-google-maps/-->
 <template>
   <div>
-    <div>
-      <gmap-autocomplete
-        @place_changed="setPlace">
-      </gmap-autocomplete>
-    </div>
     <gmap-map
       :center="center"
       :zoom="12"
