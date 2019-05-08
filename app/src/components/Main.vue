@@ -15,29 +15,37 @@
           <i class="el-icon-plus addProduct" @click="addProduct"></i>
         </el-col>
     </el-row>
-    <!-- PUT THE MAP IN THIS DIV -->
+    <div class="searchMenu">
+    </div>
     <div class="map">
       <google-map ref="map"/>
     </div>
     <div class="addProduct-modal">
-      <div class="modal-content">
+      <div class="addProduct-content">
         <i class="el-icon-close closeSubmit" @click="closeAddProduct"></i>
         <h2> Add Product </h2>
-        <el-input class="input-field" placeholder="Address" v-model="address"></el-input>
-        <gmap-autocomplete
-            class="addressInput"
-            placeholder="Please type your address"
-            v-on:placechanged="getAddressData"
-        >
-        </gmap-autocomplete>
-        <el-input class="input-field" placeholder="Last name" v-model="User.lastName"></el-input>
-        <el-input class="input-field" placeholder="Email Address" v-model="User.emailAddress"></el-input>
-        <el-input class="input-field" placeholder="Street Address" v-model="User.streetAddress"></el-input>
-        <el-input class="input-field" placeholder="Phone Number" v-model="User.phoneNumber">
-          <template slot="prepend">+61</template>
+        <el-input class="input-field" placeholder="Name" v-model="Product.name">
         </el-input>
-        <el-input class="input-field" placeholder="Password" v-model="User.password" show-password></el-input>
-        <el-input class="input-field" placeholder="Confirm password" v-model="User.passwordConfirm" show-password></el-input>
+        <el-input class="input-field" placeholder="Description" v-model="Product.description">
+        </el-input>
+        <el-select v-model="Product.category" placeholder="Select">
+          <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+        <el-date-picker
+          v-model="Product.expirationDate"
+          type="date"
+          placeholder="Pick an expiry date">
+        </el-date-picker>
+        <gmap-autocomplete
+          @place_changed="setPlace">
+        </gmap-autocomplete>
+        <el-rate v-model="Product.condition">
+        </el-rate>
         <el-button @click="submit"> Submit </el-button>
       </div>
     </div>
@@ -58,15 +66,30 @@ export default {
     return {
       url: 'https://i.ibb.co/9hBzZQj/k2kSmall.png',
       errors: [],
-      address: '',
-      User: {
-        firstName: '',
-        lastName: '',
-        emailAddress: '',
-        streetAddress: '',
-        phoneNumber: '',
-        password: '',
-        passwordConfirm: ''
+      options: [{
+        value: 'Fruit',
+        label: 'Fruit'
+      }, {
+        value: 'Vegtable',
+        label: 'Vegtable'
+      }, {
+        value: 'Baking',
+        label: 'Baking'
+      }, {
+        value: 'Meat',
+        label: 'Meat'
+      }, {
+        value: 'Dairy',
+        label: 'Dairy'
+      }],
+      Product: {
+        description: '',
+        name: '',
+        expirationDate: '',
+        address: '',
+        marker: '',
+        category: '',
+        condition: ''
       }
     }
   },
@@ -78,11 +101,20 @@ export default {
       document.querySelector('.addProduct-modal').style.display = 'none'
     },
     submit () {
-      this.$refs.map.addMarker()
-      axios.post('http://localhost:3000/users', { User: this.User })
+      console.log(this.Product)
+      axios.post('http://localhost:3000/products', { Product: this.Product })
+      document.querySelector('.addProduct-modal').style.display = 'none'
     },
     logIn () {
       router.push({ name: 'main' })
+    },
+    setPlace (place) {
+      const marker = {
+        lat: place.geometry.location.lat(),
+        lng: place.geometry.location.lng()
+      }
+      this.Product.address = place.formatted_address
+      this.Product.marker = marker
     }
   }
 }
@@ -136,12 +168,13 @@ export default {
     align-items: center;
     display: none;
   }
-  .modal-content {
+  .addProduct-content {
     padding: 40px 40px 40px 40px;
     width: 800px;
     height: 100%;
     background-color: white;
     border-radius: 18px;
+    background-color: rgba(255,255,255,0.6);
   }
   .close {
     postition: absolute;
@@ -199,4 +232,17 @@ export default {
     width: 100%;
     height: 5%;
   }
+  .searchMenu {
+    width: 100%;
+    height: 20%;
+    position: absolute;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    background-color: rgba(255,255,255,0.6);
+  }
+  .searchMenu:hover {
+    display: flex;
+  }
+
 </style>
