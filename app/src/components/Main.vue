@@ -1,44 +1,78 @@
 <template>
   <div class="pg">
-
     <el-row class="top">
       <el-row class="logo">
         LOGO
       </el-row >
-        <el-col :span="8">
-          <i class="el-icon-s-unfold hamburg"></i>
-        </el-col>
-        <el-col :span="8">
-          <el-input placeholder="Search Query"  size="small" class="searchInput"></el-input>
-        </el-col>
-        <el-col :span="8">
-          <i class="el-icon-plus addProduct" @click="addProduct"></i>
-        </el-col>
+      <el-col :span="8">
+        <i class="el-icon-s-unfold hamburg"></i>
+      </el-col>
+      <el-col :span="8">
+        <div @click="searchBar">
+          <el-input v-model="Search.query" placeholder="Search Query" size="small" class="searchInput">
+         </el-input>
+        </div>
+      </el-col>
+      <el-col :span="8">
+        <i class="el-icon-plus addProduct" @click="addProduct"></i>
+      </el-col>
     </el-row>
-    <!-- PUT THE MAP IN THIS DIV -->
+
+    <div class="searchBar">
+      <el-row class="searchRow">
+        <el-col :span="4" :offset="6">
+          <div class="inputLabel"> category </div>
+          <el-select size="mini" v-model="Search.category" placeholder="Select">
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-col>
+        <el-col class="searchCondition" :span="4">
+          <div class="inputLabel"> condition </div>
+          <el-rate v-model="Search.condition"></el-rate>
+        </el-col>
+        <el-col class="searchButton" :span="4">
+           <el-button @click="search"> Search </el-button>
+        </el-col>
+      </el-row>
+    </div>
+
     <div class="map">
       <google-map ref="map"/>
     </div>
     <div class="addProduct-modal">
-      <div class="modal-content">
+      <div class="addProduct-content">
         <i class="el-icon-close closeSubmit" @click="closeAddProduct"></i>
         <h2> Add Product </h2>
-        <el-input class="input-field" placeholder="Address" v-model="address"></el-input>
-        <gmap-autocomplete
-            class="addressInput"
-            placeholder="Please type your address"
-            v-on:placechanged="getAddressData"
-        >
-        </gmap-autocomplete>
-        <el-input class="input-field" placeholder="Last name" v-model="User.lastName"></el-input>
-        <el-input class="input-field" placeholder="Email Address" v-model="User.emailAddress"></el-input>
-        <el-input class="input-field" placeholder="Street Address" v-model="User.streetAddress"></el-input>
-        <el-input class="input-field" placeholder="Phone Number" v-model="User.phoneNumber">
-          <template slot="prepend">+61</template>
+        <el-input class="input-field" placeholder="Name" v-model="Product.name">
         </el-input>
-        <el-input class="input-field" placeholder="Password" v-model="User.password" show-password></el-input>
-        <el-input class="input-field" placeholder="Confirm password" v-model="User.passwordConfirm" show-password></el-input>
-        <el-button @click="submit"> Submit </el-button>
+        <el-input class="input-field" placeholder="Description" v-model="Product.description">
+        </el-input>
+        <el-select v-model="Product.category" placeholder="Select">
+          <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+        <el-date-picker
+          class="input-field"
+          v-model="Product.expirationDate"
+          type="date"
+          placeholder="Pick an expiry date">
+        </el-date-picker>
+        <gmap-autocomplete
+          class="input-field"
+          @place_changed="setPlace">
+        </gmap-autocomplete>
+        <el-rate class="input-field" v-model="Product.condition">
+        </el-rate>
+        <el-button class="input-field" @click="submit"> Submit </el-button>
       </div>
     </div>
   </div>
@@ -57,32 +91,70 @@ export default {
   data () {
     return {
       url: 'https://i.ibb.co/9hBzZQj/k2kSmall.png',
+      imageUrl: '',
       errors: [],
-      address: '',
-      User: {
-        firstName: '',
-        lastName: '',
-        emailAddress: '',
-        streetAddress: '',
-        phoneNumber: '',
-        password: '',
-        passwordConfirm: ''
+      options: [{
+        value: 'Fruit',
+        label: 'Fruit'
+      }, {
+        value: 'Vegtable',
+        label: 'Vegtable'
+      }, {
+        value: 'Baking',
+        label: 'Baking'
+      }, {
+        value: 'Meat',
+        label: 'Meat'
+      }, {
+        value: 'Dairy',
+        label: 'Dairy'
+      }],
+      Search: {
+        category: '',
+        condition: 0,
+        query: ''
+      },
+      Product: {
+        description: '',
+        name: '',
+        expirationDate: '',
+        address: '',
+        marker: '',
+        category: '',
+        condition: 0
       }
     }
   },
   methods: {
     addProduct () {
       document.querySelector('.addProduct-modal').style.display = 'flex'
+      document.querySelector('.searchBar').style.display = 'none'
+    },
+    searchBar () {
+      document.querySelector('.searchBar').style.display = 'flex'
     },
     closeAddProduct () {
       document.querySelector('.addProduct-modal').style.display = 'none'
     },
     submit () {
-      this.$refs.map.addMarker()
-      axios.post('http://localhost:3000/users', { User: this.User })
+      console.log(this.Product)
+      axios.post('http://localhost:3000/products', { Product: this.Product })
+      document.querySelector('.addProduct-modal').style.display = 'none'
     },
     logIn () {
       router.push({ name: 'main' })
+    },
+    setPlace (place) {
+      const marker = {
+        lat: place.geometry.location.lat(),
+        lng: place.geometry.location.lng()
+      }
+      this.Product.address = place.formatted_address
+      this.Product.marker = marker
+    },
+    search () {
+      // Search Query code in here, leave the line below at the bottom :)
+      document.querySelector('.searchBar').style.display = 'none'
     }
   }
 }
@@ -136,12 +208,13 @@ export default {
     align-items: center;
     display: none;
   }
-  .modal-content {
+  .addProduct-content {
     padding: 40px 40px 40px 40px;
     width: 800px;
     height: 100%;
     background-color: white;
     border-radius: 18px;
+    background-color: rgba(255,255,255,0.6);
   }
   .close {
     postition: absolute;
@@ -171,8 +244,6 @@ export default {
   .headerRow {
     margin: -20px -10px -10px -10px;
   }
-  .map {
-  }
   .searchInput {
     width: 320px;
   }
@@ -181,8 +252,8 @@ export default {
     max-width: 100%;
   }
   .top {
-    height: 15%;
-    margin-bottom: 0px;
+    height: 12%;
+    margin-bottom: 16px;
   }
   .middle {
     height: 80%;
@@ -199,4 +270,16 @@ export default {
     width: 100%;
     height: 5%;
   }
+  .searchBar {
+    height: 12%;
+    display: none;
+  }
+  .searchRow {
+    min-height: 30px;
+    width: 100%;
+  }
+  .searchButton {
+    padding-top: 0.7%;
+  }
+
 </style>
