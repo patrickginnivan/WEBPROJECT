@@ -4,89 +4,20 @@
       <el-row class="logo">
         LOGO
       </el-row >
-      <el-col :span="8">
+      <el-col :span="12">
         <i class="el-icon-s-unfold hamburg" @click="openMenu"></i>
       </el-col>
-      <el-col :span="8">
-        <div @click="searchBar">
-          <el-input v-model="Search.query" placeholder="Search Query" size="small" class="searchInput">
-         </el-input>
-        </div>
-      </el-col>
-      <el-col :span="8">
+      <el-col :span="12">
         <i class="el-icon-plus addProduct" @click="addProduct"></i>
       </el-col>
     </el-row>
-    <div class="searchBar">
-      <el-row class="searchRow">
-        <el-col :span="4" :offset="6">
-          <div class="inputLabel"> category </div>
-          <el-select size="mini" v-model="Search.category" placeholder="Select">
-            <el-option
-              v-for="item in options"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
-            </el-option>
-          </el-select>
-        </el-col>
-        <el-col class="searchCondition" :span="4">
-          <div class="inputLabel"> condition </div>
-          <el-rate v-model="Search.condition"></el-rate>
-        </el-col>
-        <el-col class="searchButton" :span="4">
-           <el-button @click="search"> Search </el-button>
-        </el-col>
-      </el-row>
-    </div>
-    <div class="map">
-      <google-map ref="map"/>
-    </div>
-    <div class="addProduct-modal">
-      <div class="addProduct-content">
-        <i class="el-icon-close closeSubmit" @click="closeAddProduct"></i>
-        <h2> Add Product </h2>
-        <el-input class="input-field" placeholder="Name" v-model="Product.name">
-        </el-input>
-        <el-input class="input-field" placeholder="Description" v-model="Product.description">
-        </el-input>
-        <div class="input-field">
-          <gmap-autocomplete
-            class="please el-input input-field"
-            @place_changed="setPlace">
-          </gmap-autocomplete>
-        </div>
-        <el-select class="category" v-model="Product.category" placeholder="Category">
-          <el-option
-            v-for="item in options"
-            :key="item.value"
-            :label="item.label"
-            :value="item.value">
-          </el-option>
-        </el-select>
-        <el-date-picker
-          class="input-field"
-          v-model="Product.expirationDate"
-          type="date"
-          placeholder="Pick an expiry date">
-        </el-date-picker>
-        <el-row>
-          <div class="conditionLabel"> Condition: </div>
-          <el-rate class="conditionLabel" v-model="Product.condition">
-          </el-rate>
-        </el-row>
-        <el-row>
-          <el-button class="input-field" @click="submit"> Submit </el-button>
-        </el-row>
-      </div>
-    </div>
     <div class="menu-modal">
       <div class="addProduct-content">
         <i class="el-icon-close closeSubmit" @click="closeMenu"></i>
         <div class="menuItems">
           <el-row>
-            <i @click="profile" class="el-icon-user-solid"></i>
-            <div> Profile </div>
+            <i  @click="main" class="el-icon-map-location"></i>
+            <div> Main </div>
           </el-row>
           <el-row>
             <i class="el-icon-odometer"></i>
@@ -167,11 +98,11 @@ export default {
       axios.post('http://localhost:3000/products', { Product: this.Product })
       document.querySelector('.addProduct-modal').style.display = 'none'
     },
+    main () {
+      router.push({ name: 'main' })
+    },
     logOut () {
       router.push({ name: 'home' })
-    },
-    profile () {
-      router.push({ name: 'profile' })
     },
     setPlace (place) {
       const marker = {
@@ -226,48 +157,12 @@ export default {
   .home-button {
     float: bottom;
   }
-  .addProduct-modal {
-    width: 20%;
-    height: 80%;
-    position: absolute;
-    bottom: 0;
-    right: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    display: none;
-  }
-  .menu-modal {
-    width: 20%;
-    height: 80%;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    display: none;
-  }
-  .addProduct-content {
-    padding: 40px 40px 40px 40px;
-    width: 800px;
-    height: 100%;
-    background-color: white;
-    border-radius: 18px;
-    background-color: rgba(255,255,255,0.8);
-  }
   .close {
     postition: absolute;
     top: 0;
     right: 14px;
     font-size: 42px;
     transform: rotate(45deg);
-  }
-  .closeSubmit {
-    float: right;
-  }
-  .input-field {
-    padding: 10px 10px 10px 10px;
   }
   .header {
     position: absolute;
@@ -300,46 +195,5 @@ export default {
   }
   .hamburg {
     float: left;
-  }
-  .addProduct {
-    float: right;
-  }
-  .addressInput {
-    border-radius: 4px;
-    margin: 0px 8px;
-    width: 100%;
-    height: 5%;
-  }
-  .searchBar {
-    height: 12%;
-    display: none;
-  }
-  .searchRow {
-    min-height: 30px;
-    width: 100%;
-  }
-  .searchButton {
-    padding-top: 0.7%;
-  }
-  .menuItems {
-    padding-top: 30%;
-  }
-  .please {
-    width: 100%;
-    border-radius: 4px;
-    border-style: solid;
-    border-width: 1px;
-    border-color: #DCDFE6;
-  }
-  .category {
-    float: left;
-    padding-left: 10px
-  }
-  .conditionLabel {
-    float: left;
-    padding-left: 10px;
-  }
-  .submit {
-    padding-top: 30px;
   }
 </style>
