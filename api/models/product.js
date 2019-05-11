@@ -9,6 +9,11 @@ const productSchema = new mongoose.Schema(
         "name":String,
         "description":String,
         "expirationDate":String,
+        "address": String,
+        "marker": {
+            "lat": Number,
+            "lng": Number
+        },
         "category":String,
         "condition":String,
         "rating":Number,
