@@ -159,7 +159,9 @@ var createProduct = function(req, res) {
             "category":req.body.Product.category,
             "condition":req.body.Product.condition,
             "rating":req.body.Product.rating,
-            "marker":req.body.Product.marker
+            "marker":req.body.Product.marker,
+            "address":req.body.Product.address,
+            "delivered":req.body.Product.delivered
         }
     );
 
@@ -198,8 +200,10 @@ var findOneProduct = function(req, res) {
 //Find one product by name
 var findProductByName = function(req, res) {
     var restName = req.params.name;
+    console.log(restName)
     Product.find({name:restName}, function(err, product) {
         if (!err) {
+            console.log(product)
             res.send(product);
         } else {
             res.sendStatus(404);
@@ -210,6 +214,7 @@ var findProductByName = function(req, res) {
 
 //Update product's data by name
 var updateProductByName = function(req, res) {
+    console.log('update by name')
     var restName = req.params.name;
     Product.findOne({name:restName}, function(err, product) {
         if (err) {
@@ -224,6 +229,7 @@ var updateProductByName = function(req, res) {
         product.category = req.body.category;
         product.condition = req.body.condition;
         product.rating = req.body.rating;
+        product.delivered = req.body.delivered;
 
         product.save(function(err) {
             if (err)

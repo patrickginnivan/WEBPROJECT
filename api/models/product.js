@@ -16,7 +16,13 @@ const productSchema = new mongoose.Schema(
         },
         "category":String,
         "condition":String,
-        "rating":Number
+        "rating":Number,
+        "address": String,
+        "marker": {
+            "lat": Number,
+            "lng": Number
+        },
+        "delivered": Boolean,
     }
 );
 

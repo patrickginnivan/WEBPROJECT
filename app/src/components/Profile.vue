@@ -8,13 +8,11 @@
         <i class="el-icon-s-unfold hamburg" @click="openMenu"></i>
       </el-col>
       <el-col :span="8">
-        <div @click="searchBar">
-          <el-input v-model="Search.query" placeholder="Search Query" size="small" class="searchInput">
-         </el-input>
+        <div>
+          <h3> PRODUCTS </h3>
         </div>
       </el-col>
       <el-col :span="8">
-        <i class="el-icon-plus addProduct" @click="addProduct"></i>
       </el-col>
     </el-row>
     <div class="searchBar">
@@ -39,8 +37,52 @@
         </el-col>
       </el-row>
     </div>
-    <div class="map">
-      <google-map ref="map"/>
+    <div class="tableContent">
+      <el-table
+        class="table"
+        :data="tableData"
+        :row-class-name="tableRowClassName">
+        style="width: 100%">
+        <el-table-column
+          fixed
+          prop="name"
+          label="Name"
+          width="150">
+        </el-table-column>
+        <el-table-column
+          prop="description"
+          label="Description"
+          width="300">
+        </el-table-column>
+        <el-table-column
+          prop="expirationDate"
+          label="Expiry Date"
+          width="120">
+        </el-table-column>
+        <el-table-column
+          prop="category"
+          label="Category"
+          width="120">
+        </el-table-column>
+        <el-table-column
+          prop="condition"
+          label="Condition"
+          width="120">
+        </el-table-column>
+        <el-table-column
+          prop="rating"
+          label="Rating"
+          width="120">
+        </el-table-column>
+        <el-table-column
+          fixed="right"
+          label="Delivered"
+          width="120">
+          <template slot-scope="scope">
+            <el-button @click="deliver(scope.$index, tableData)" :type="delivered(scope.$index, tableData)" icon="el-icon-check" circle></el-button>
+          </template>
+        </el-table-column>
+      </el-table>
     </div>
     <div class="addProduct-modal">
       <div class="addProduct-content">
@@ -85,8 +127,8 @@
         <i class="el-icon-close closeSubmit" @click="closeMenu"></i>
         <div class="menuItems">
           <el-row>
-            <i @click="profile" class="el-icon-user-solid"></i>
-            <div> Profile </div>
+            <i @click="main" class="el-icon-map-location"></i>
+            <div> Main </div>
           </el-row>
           <el-row>
             <i class="el-icon-odometer"></i>
@@ -114,6 +156,8 @@ export default {
       url: 'https://i.ibb.co/9hBzZQj/k2kSmall.png',
       imageUrl: '',
       errors: [],
+      value5: '',
+      tableData: [],
       options: [{
         value: 'Fruit',
         label: 'Fruit'
@@ -142,10 +186,12 @@ export default {
         address: '',
         marker: '',
         category: '',
-        condition: 0,
-        delivered: false
+        condition: 0
       }
     }
+  },
+  created () {
+    this.getProducts()
   },
   methods: {
     addProduct () {
@@ -171,8 +217,8 @@ export default {
     logOut () {
       router.push({ name: 'home' })
     },
-    profile () {
-      router.push({ name: 'profile' })
+    main () {
+      router.push({ name: 'main' })
     },
     setPlace (place) {
       const marker = {
@@ -185,6 +231,29 @@ export default {
     search () {
       // Search Query code in here, leave the line below at the bottom :)
       document.querySelector('.searchBar').style.display = 'none'
+    },
+    getProducts () {
+      axios.get('http://localhost:3000/products').then(response => (this.tableData = response.data))
+      console.log(this.tableData)
+    },
+    deliver (index, rows) {
+      rows[index].delivered = !rows[index].delivered
+      axios.put('http://localhost:3000/products/name/' + rows[index].name, rows[index])
+    },
+    tableRowClassName ({row, rowIndex}) {
+      console.log(row)
+      if (row.delivered) {
+        return 'warning-row'
+      } else {
+        return 'success-row'
+      }
+    },
+    delivered (index, rows) {
+      if (rows[index].delivered) {
+        return 'danger'
+      } else {
+        return 'success'
+      }
     }
   }
 }
@@ -342,5 +411,21 @@ export default {
   }
   .submit {
     padding-top: 30px;
+  }
+  .tableContent {
+    padding-left: 20%;
+    padding-right: 20%;
+    width: 60%;
+    height: 80%;
+  }
+  .el-table .warning-row {
+    background: white;
+  }
+
+  .el-table .success-row {
+    background: #67C23A;
+  }
+  .table {
+    height: 100%;
   }
 </style>
