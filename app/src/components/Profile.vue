@@ -4,19 +4,130 @@
       <el-row class="logo">
         LOGO
       </el-row >
-      <el-col :span="12">
+      <el-col :span="8">
         <i class="el-icon-s-unfold hamburg" @click="openMenu"></i>
       </el-col>
-      <el-col :span="12">
-        <i class="el-icon-plus addProduct" @click="addProduct"></i>
+      <el-col :span="8">
+        <div>
+          <h3> PRODUCTS </h3>
+        </div>
+      </el-col>
+      <el-col :span="8">
       </el-col>
     </el-row>
+    <div class="searchBar">
+      <el-row class="searchRow">
+        <el-col :span="4" :offset="6">
+          <div class="inputLabel"> category </div>
+          <el-select size="mini" v-model="Search.category" placeholder="Select">
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value">
+            </el-option>
+          </el-select>
+        </el-col>
+        <el-col class="searchCondition" :span="4">
+          <div class="inputLabel"> condition </div>
+          <el-rate v-model="Search.condition"></el-rate>
+        </el-col>
+        <el-col class="searchButton" :span="4">
+           <el-button @click="search"> Search </el-button>
+        </el-col>
+      </el-row>
+    </div>
+    <div class="tableContent">
+      <el-table
+        class="table"
+        :data="tableData"
+        :row-class-name="tableRowClassName">
+        style="width: 100%">
+        <el-table-column
+          fixed
+          prop="name"
+          label="Name"
+          width="150">
+        </el-table-column>
+        <el-table-column
+          prop="description"
+          label="Description"
+          width="300">
+        </el-table-column>
+        <el-table-column
+          prop="expirationDate"
+          label="Expiry Date"
+          width="120">
+        </el-table-column>
+        <el-table-column
+          prop="category"
+          label="Category"
+          width="120">
+        </el-table-column>
+        <el-table-column
+          prop="condition"
+          label="Condition"
+          width="120">
+        </el-table-column>
+        <el-table-column
+          prop="rating"
+          label="Rating"
+          width="120">
+        </el-table-column>
+        <el-table-column
+          fixed="right"
+          label="Delivered"
+          width="120">
+          <template slot-scope="scope">
+            <el-button @click="deliver(scope.$index, tableData)" :type="delivered(scope.$index, tableData)" icon="el-icon-check" circle></el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+    </div>
+    <div class="addProduct-modal">
+      <div class="addProduct-content">
+        <i class="el-icon-close closeSubmit" @click="closeAddProduct"></i>
+        <h2> Add Product </h2>
+        <el-input class="input-field" placeholder="Name" v-model="Product.name">
+        </el-input>
+        <el-input class="input-field" placeholder="Description" v-model="Product.description">
+        </el-input>
+        <div class="input-field">
+          <gmap-autocomplete
+            class="please el-input input-field"
+            @place_changed="setPlace">
+          </gmap-autocomplete>
+        </div>
+        <el-select class="category" v-model="Product.category" placeholder="Category">
+          <el-option
+            v-for="item in options"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+          </el-option>
+        </el-select>
+        <el-date-picker
+          class="input-field"
+          v-model="Product.expirationDate"
+          type="date"
+          placeholder="Pick an expiry date">
+        </el-date-picker>
+        <el-row>
+          <div class="conditionLabel"> Condition: </div>
+          <el-rate class="conditionLabel" v-model="Product.condition">
+          </el-rate>
+        </el-row>
+        <el-row>
+          <el-button class="input-field" @click="submit"> Submit </el-button>
+        </el-row>
+      </div>
+    </div>
     <div class="menu-modal">
       <div class="addProduct-content">
         <i class="el-icon-close closeSubmit" @click="closeMenu"></i>
         <div class="menuItems">
           <el-row>
-            <i  @click="main" class="el-icon-map-location"></i>
+            <i @click="main" class="el-icon-map-location"></i>
             <div> Main </div>
           </el-row>
           <el-row>
@@ -45,6 +156,8 @@ export default {
       url: 'https://i.ibb.co/9hBzZQj/k2kSmall.png',
       imageUrl: '',
       errors: [],
+      value5: '',
+      tableData: [],
       options: [{
         value: 'Fruit',
         label: 'Fruit'
@@ -77,6 +190,9 @@ export default {
       }
     }
   },
+  created () {
+    this.getProducts()
+  },
   methods: {
     addProduct () {
       document.querySelector('.addProduct-modal').style.display = 'flex'
@@ -98,11 +214,11 @@ export default {
       axios.post('http://localhost:3000/products', { Product: this.Product })
       document.querySelector('.addProduct-modal').style.display = 'none'
     },
-    main () {
-      router.push({ name: 'main' })
-    },
     logOut () {
       router.push({ name: 'home' })
+    },
+    main () {
+      router.push({ name: 'main' })
     },
     setPlace (place) {
       const marker = {
@@ -115,6 +231,29 @@ export default {
     search () {
       // Search Query code in here, leave the line below at the bottom :)
       document.querySelector('.searchBar').style.display = 'none'
+    },
+    getProducts () {
+      axios.get('http://localhost:3000/products').then(response => (this.tableData = response.data))
+      console.log(this.tableData)
+    },
+    deliver (index, rows) {
+      rows[index].delivered = !rows[index].delivered
+      axios.put('http://localhost:3000/products/name/' + rows[index].name, rows[index])
+    },
+    tableRowClassName ({row, rowIndex}) {
+      console.log(row)
+      if (row.delivered) {
+        return 'warning-row'
+      } else {
+        return 'success-row'
+      }
+    },
+    delivered (index, rows) {
+      if (rows[index].delivered) {
+        return 'danger'
+      } else {
+        return 'success'
+      }
     }
   }
 }
@@ -157,12 +296,48 @@ export default {
   .home-button {
     float: bottom;
   }
+  .addProduct-modal {
+    width: 20%;
+    height: 80%;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    display: none;
+  }
+  .menu-modal {
+    width: 20%;
+    height: 80%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    display: none;
+  }
+  .addProduct-content {
+    padding: 40px 40px 40px 40px;
+    width: 800px;
+    height: 100%;
+    background-color: white;
+    border-radius: 18px;
+    background-color: rgba(255,255,255,0.8);
+  }
   .close {
     postition: absolute;
     top: 0;
     right: 14px;
     font-size: 42px;
     transform: rotate(45deg);
+  }
+  .closeSubmit {
+    float: right;
+  }
+  .input-field {
+    padding: 10px 10px 10px 10px;
   }
   .header {
     position: absolute;
@@ -195,5 +370,62 @@ export default {
   }
   .hamburg {
     float: left;
+  }
+  .addProduct {
+    float: right;
+  }
+  .addressInput {
+    border-radius: 4px;
+    margin: 0px 8px;
+    width: 100%;
+    height: 5%;
+  }
+  .searchBar {
+    height: 12%;
+    display: none;
+  }
+  .searchRow {
+    min-height: 30px;
+    width: 100%;
+  }
+  .searchButton {
+    padding-top: 0.7%;
+  }
+  .menuItems {
+    padding-top: 30%;
+  }
+  .please {
+    width: 100%;
+    border-radius: 4px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #DCDFE6;
+  }
+  .category {
+    float: left;
+    padding-left: 10px
+  }
+  .conditionLabel {
+    float: left;
+    padding-left: 10px;
+  }
+  .submit {
+    padding-top: 30px;
+  }
+  .tableContent {
+    padding-left: 20%;
+    padding-right: 20%;
+    width: 60%;
+    height: 80%;
+  }
+  .el-table .warning-row {
+    background: white;
+  }
+
+  .el-table .success-row {
+    background: #67C23A;
+  }
+  .table {
+    height: 100%;
   }
 </style>

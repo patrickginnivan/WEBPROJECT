@@ -142,7 +142,8 @@ export default {
         address: '',
         marker: '',
         category: '',
-        condition: 0
+        condition: 0,
+        delivered: false
       }
     }
   },
