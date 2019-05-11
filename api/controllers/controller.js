@@ -148,16 +148,20 @@ module.exports.deleteUserById = deleteUserById;
 /* For all the products operation */
 // Create new product
 var createProduct = function(req, res) {
+    console.log('Hello')
     var product = new Product(
         {
-            "userId":req.body.userId,
-            "createdAt":req.body.createdAt,
-            "name":req.body.name,
-            "description":req.body.description,
-            "expirationDate":req.body.expirationDate,
-            "category":req.body.category,
-            "condition":req.body.condition,
-            "rating":req.body.rating
+            "userId":req.body.Product.userId,
+            "createdAt":req.body.Product.createdAt,
+            "name":req.body.Product.name,
+            "description":req.body.Product.description,
+            "expirationDate":req.body.Product.expirationDate,
+            "category":req.body.Product.category,
+            "condition":req.body.Product.condition,
+            "rating":req.body.Product.rating,
+            "marker":req.body.Product.marker,
+            "address":req.body.Product.address,
+            "delivered":req.body.Product.delivered
         }
     );
 
@@ -165,7 +169,6 @@ var createProduct = function(req, res) {
         if (!err) {
             res.send(newProduct);
         } else {
-            console.log("here");
             res.sendStatus(400);
         }
     });
@@ -197,8 +200,10 @@ var findOneProduct = function(req, res) {
 //Find one product by name
 var findProductByName = function(req, res) {
     var restName = req.params.name;
+    console.log(restName)
     Product.find({name:restName}, function(err, product) {
         if (!err) {
+            console.log(product)
             res.send(product);
         } else {
             res.sendStatus(404);
@@ -209,6 +214,7 @@ var findProductByName = function(req, res) {
 
 //Update product's data by name
 var updateProductByName = function(req, res) {
+    console.log('update by name')
     var restName = req.params.name;
     Product.findOne({name:restName}, function(err, product) {
         if (err) {
@@ -223,6 +229,7 @@ var updateProductByName = function(req, res) {
         product.category = req.body.category;
         product.condition = req.body.condition;
         product.rating = req.body.rating;
+        product.delivered = req.body.delivered;
 
         product.save(function(err) {
             if (err)

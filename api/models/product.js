@@ -11,7 +11,13 @@ const productSchema = new mongoose.Schema(
         "expirationDate":String,
         "category":String,
         "condition":String,
-        "rating":Number
+        "rating":Number,
+        "address": String,
+        "marker": {
+            "lat": Number,
+            "lng": Number
+        },
+        "delivered": Boolean,
     }
 );
 
